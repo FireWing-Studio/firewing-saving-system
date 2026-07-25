@@ -57,7 +57,7 @@ class Result extends RefCounted:
 		return Result.new(null, err)
 
 class Header extends RefCounted:
-	var magic_number: StringName
+	var magic_number: int
 	var version: int
 	var file_size: int
 	var toc_count: int
@@ -82,4 +82,4 @@ class TocEntry extends RefCounted:
 class FileData extends RefCounted:
 	var header: Header = Header.new()
 	var toc: Dictionary[StringName, TocEntry] = {}
-	var payloads: Array[PackedByteArray] = []
+	var payloads: Dictionary[StringName, PackedByteArray] = {}

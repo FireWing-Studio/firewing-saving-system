@@ -2,6 +2,8 @@
 class_name FWBinaryParser
 extends RefCounted
 
+const CURRENT_VERSION: int = 1
+
 const MAGIC_NUMBER: int = 0x56535746	# FWSV
 
 const GAME_LITERAL_SIZE = 32
@@ -29,6 +31,7 @@ func decode(bytes: PackedByteArray) -> FWSaveTypes.Result:
 	var magic_number := stream.get_u32()
 	if magic_number != MAGIC_NUMBER:
 		return FWSaveTypes.Result.failure(FWSaveTypes.Error.INVALID_FILE_TYPE)
+	file_data.header.magic_number = MAGIC_NUMBER
 	
 	var header_version := stream.get_u32()
 	file_data.header.version = header_version
@@ -122,3 +125,32 @@ func _decode_v1_toc(stream: StreamPeerBuffer, file_data: FWSaveTypes.FileData) -
 		file_data.toc[toc_entry.key] = toc_entry
 	
 	return FWSaveTypes.Result.success(file_data)
+
+func encode(file_data: FWSaveTypes.FileData) -> FWSaveTypes.Result:
+	match CURRENT_VERSION:
+		1:
+			return _encode_v1(file_data)
+		_:
+			return FWSaveTypes.Result.failure(FWSaveTypes.Error.UNKNOWN_HEADER_VERSION)
+
+func _encode_v1(file_data: FWSaveTypes.FileData) -> FWSaveTypes.Result:
+	var size: int = 256 + 80 * file_data.toc.size()
+	for key in file_data.payloads:
+		size += file_data.payloads[key].size()
+	
+	var buffer: PackedByteArray = PackedByteArray()
+	buffer.resize(size)
+	
+	
+	
+	return FWSaveTypes.Result.failure(100)
+
+func _encode_v1_header(file_data: FWSaveTypes.FileData, stream: StreamPeerBuffer):
+	file_data.header.magic_number = MAGIC_NUMBER
+	file_data.header.version = 1
+
+func _encode_v1_toc():
+	pass
+
+func _encode_v1_payloads():
+	pass
